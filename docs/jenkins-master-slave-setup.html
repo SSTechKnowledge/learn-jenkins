@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jenkins Master-Agent Setup Guide on AWS</title>
+  <style>
+    /* Base styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px 40px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    h1, h2, h3 {
+      color: #000;
+      margin-top: 20px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    h2 {
+      border-bottom: 2px solid #e2e2e2;
+      padding-bottom: 5px;
+    }
+    p {
+      margin: 15px 0;
+    }
+    ul, ol {
+      margin: 15px 0 15px 20px;
+    }
+    li {
+      margin: 8px 0;
+    }
+    code {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: Consolas, Monaco, 'Courier New', monospace;
+    }
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      overflow: auto;
+      margin: 15px 0;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid #ddd;
+      margin: 30px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Jenkins Master-Agent Setup Guide on AWS</h1>
+    <p>
+      Here’s a step-by-step guide to setting up a Jenkins Master-Agent (Master-Slave) architecture using AWS t2.micro Ubuntu EC2 instances. This setup allows the Jenkins Master to delegate jobs to an Agent (Slave) for distributed builds.
+    </p>
+    <img src="./images/jenkins-master-slave-setup-ec2.png" alt="Jenkins Master-Node Setup">
+    <h2>Prerequisites</h2>
+    <ul>
+      <li><strong>AWS Account:</strong> With permissions to launch EC2 instances.</li>
+      <li><strong>Key Pair:</strong> An AWS key pair (.pem file) for SSH access.</li>
+      <li>
+        <strong>2 EC2 Instances (t2.micro, Ubuntu 22.04 LTS):</strong>
+        <ul>
+          <li><strong>Master:</strong> Jenkins server (public IP).</li>
+          <li><strong>Slave/Agent:</strong> Worker node (private/public IP).</li>
+        </ul>
+      </li>
+    </ul>
+    
+    <h2>Step 1: Launch EC2 Instances</h2>
+    <h3>Master Instance:</h3>
+    <p>Launch an EC2 instance with:</p>
+    <ul>
+      <li><strong>OS:</strong> Ubuntu 22.04 LTS.</li>
+      <li><strong>Instance Type:</strong> t2.micro.</li>
+      <li>
+        <strong>Security Group:</strong> Allow inbound traffic on ports:
+        <ul>
+          <li>SSH (22)</li>
+          <li>HTTP (80)</li>
+          <li>Custom TCP (8080) (for Jenkins)</li>
+        </ul>
+      </li>
+      <li>Attach your key pair.</li>
+    </ul>
+    
+    <h3>Slave Instance:</h3>
+    <p>Repeat the above steps for the Slave, but only open SSH (22) in the security group.</p>
+    
+    <hr />
+    
+    <h2>Step 2: Install Jenkins on the Master</h2>
+    <h3>SSH into the Master:</h3>
+    <pre>ssh -i "your-key.pem" ubuntu@&lt;master-public-ip&gt;</pre>
+    
+    <h3>Install Java (Jenkins dependency):</h3>
+    <pre>sudo apt update
+sudo apt install openjdk-17-jdk -y</pre>
+    
+    <h3>Install Jenkins:</h3>
+    <pre>curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc &gt; /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list &gt; /dev/null
+sudo apt update
+sudo apt install jenkins -y</pre>
+    
+    <h3>Start Jenkins:</h3>
+    <pre>sudo systemctl start jenkins
+sudo systemctl enable jenkins</pre>
+    
+    <h3>Get Jenkins Admin Password:</h3>
+    <pre>sudo cat /var/lib/jenkins/secrets/initialAdminPassword</pre>
+    
+    <h3>Complete Jenkins Setup:</h3>
+    <p>
+      Access Jenkins via <code>http://&lt;master-public-ip&gt;:8080</code>. Paste the admin password, install suggested plugins, and create an admin user.
+    </p>
+    
+    <hr />
+    
+    <h2>Step 3: Prepare the Slave (Agent)</h2>
+    <h3>SSH into the Slave:</h3>
+    <pre>ssh -i "your-key.pem" ubuntu@&lt;slave-ip&gt;</pre>
+    
+    <h3>Install Java (required for Jenkins agents):</h3>
+    <pre>sudo apt update
+sudo apt install openjdk-17-jdk -y</pre>
+    
+    <h3>Create a Jenkins User (optional but recommended):</h3>
+    <pre>sudo useradd -m -d /home/jenkins-agent -s /bin/bash jenkins-agent
+sudo passwd jenkins-agent  # Set a password</pre>
+    
+    <h3>Generate SSH Key Pair (on the Master for passwordless access to the Slave):</h3>
+    <p>On the Master instance:</p>
+    <pre>sudo -u jenkins ssh-keygen -t rsa  # Save to /var/lib/jenkins/.ssh/id_rsa
+sudo cat /var/lib/jenkins/.ssh/id_rsa.pub</pre>
+    
+    <p>Copy the public key.</p>
+    
+    <h4>NOTE:</h4>
+    <ul>
+      <li>Jenkins requires private keys in <strong>PEM</strong> format (-----BEGIN RSA PRIVATE KEY-----).</li>
+      <li>Modern ssh-keygen generates keys in <strong>OpenSSH</strong> format by default, which is incompatible.</li>
+      <li>Convert the key to PEM format or regenerate it in PEM format to resolve the issue.</li>
+      <li>To generate an RSA private key in the PEM format, use the <em>-m PEM</em> option with ssh-keygen. Here&rsquo;s the command:</li>
+    </ul>
+    <pre>sudo -u jenkins ssh-keygen -t rsa -m PEM -f /var/lib/jenkins/.ssh/id_rsa</pre>
+
+    <h3>Add Public Key to Slave:</h3>
+    <p>On the Slave instance:</p>
+    <pre>sudo su - jenkins-agent
+mkdir -p ~/.ssh
+echo "&lt;paste-public-key-here&gt;" >> ~/.ssh/authorized_keys
+chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys</pre>
+    
+    <hr />
+    
+    <h2>Step 4: Configure Jenkins Agent</h2>
+    <p>On the Jenkins Master:</p>
+    <ol>
+      <li>
+        Go to <strong>Dashboard → Manage Jenkins → Nodes → New Node</strong>.
+      </li>
+      <li>
+        Enter a name (e.g., <code>ubuntu-agent</code>), select <strong>Permanent Agent</strong>, and click Create.
+      </li>
+    </ol>
+    
+    <h3>Configure the Agent:</h3>
+    <ul>
+      <li>
+        <strong>Remote root directory:</strong> /home/jenkins-agent (matches the Slave’s user home).
+      </li>
+      <li>
+        <strong>Labels:</strong> linux or ubuntu (to target jobs to this agent).
+      </li>
+      <li>
+        <strong>Launch method:</strong> Launch agents via SSH.
+      </li>
+      <li>
+        <strong>Host:</strong> &lt;slave-private-ip&gt; (use private IP for internal AWS communication).
+      </li>
+      <li>
+        <strong>Credentials:</strong> Add a new SSH credential:
+        <ul>
+          <li><strong>Username:</strong> jenkins-agent</li>
+          <li>
+            <strong>Private Key:</strong> Copy the private key from <code>/var/lib/jenkins/.ssh/id_rsa</code> (on the Master).
+          </li>
+        </ul>
+      </li>
+      <li>
+        <strong>Host Key Verification Strategy:</strong> Non verifying Verification Strategy.
+      </li>
+    </ul>
+    <p>
+      Click Save. Jenkins will automatically connect to the Slave via SSH. Verify the agent is online under Dashboard → Nodes.
+    </p>
+    
+    <hr />
+    
+    <h2>Step 5: Test the Setup</h2>
+    <h3>Create a Test Job:</h3>
+    <ol>
+      <li>
+        Go to <strong>Dashboard → New Item → Freestyle project</strong>.
+      </li>
+      <li>
+        Under <strong>Restrict where this project can be run</strong>, enter the agent’s label (e.g., <code>linux</code>).
+      </li>
+      <li>
+        Add a build step: <strong>Execute shell</strong> → <code>echo "Hello from Agent!"</code>.
+      </li>
+      <li>
+        Click <strong>Build Now</strong>.
+      </li>
+    </ol>
+    <h3>Verify Execution:</h3>
+    <p>Check the build logs to confirm it ran on the Slave.</p>
+    
+    <hr />
+    
+    <h2>Troubleshooting</h2>
+    <h3>Agent Offline:</h3>
+    <ul>
+      <li>
+        Check SSH connectivity: <code>ssh -i /var/lib/jenkins/.ssh/id_rsa jenkins-agent@&lt;slave-ip&gt;</code> (from the Master).
+      </li>
+      <li>
+        Ensure the Slave’s security group allows SSH from the Master’s private IP.
+      </li>
+      <li>
+        Verify the jenkins-agent user’s permissions on the Slave.
+      </li>
+    </ul>
+    
+    <h3>Build Failures:</h3>
+    <ul>
+      <li>
+        Ensure required tools (e.g., Git, Maven) are installed on the Slave.
+      </li>
+    </ul>
+  </div>
+</body>
+</html>

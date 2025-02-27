@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jenkins Slave (Agent) Dependencies and Setup</title>
+  <style>
+    /* Base styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px 40px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    h1, h2, h3 {
+      color: #000;
+      margin-top: 20px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    h2 {
+      border-bottom: 2px solid #e2e2e2;
+      padding-bottom: 5px;
+    }
+    p {
+      margin: 15px 0;
+    }
+    ul, ol {
+      margin: 15px 0 15px 20px;
+    }
+    li {
+      margin: 8px 0;
+    }
+    code {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: Consolas, Monaco, 'Courier New', monospace;
+    }
+    pre {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      overflow: auto;
+      margin: 15px 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 15px 0;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid #ddd;
+      margin: 30px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Jenkins Slave (Agent) Dependencies and Setup</h1>
+    <p>
+      The Jenkins Slave (Agent) primarily requires Java to communicate with the Jenkins Master, but additional dependencies depend on the type of jobs/tasks you want the agent to execute. Here's a detailed breakdown:
+    </p>
+    
+    <h2>1. Java is Mandatory</h2>
+    <h3>Why?</h3>
+    <p>
+      Jenkins agents use the Jenkins Remoting library (Java-based) to communicate with the Master.
+    </p>
+    <p>
+      <strong>Minimum Java version:</strong> Must match the Master’s Java version (e.g., Java 17 if the Master uses Java 17).
+    </p>
+    
+    <h2>2. Additional Tools (Depends on Your Jobs)</h2>
+    <p>
+      If your Jenkins jobs require specific tools or environments, those tools must be installed on the agent:
+    </p>
+    <h3>Examples:</h3>
+    <ul>
+      <li><strong>Build Tools:</strong> Maven, Gradle, npm, pip, .NET SDK, Go, etc.</li>
+      <li><strong>Version Control:</strong> Git, Mercurial, or SVN (if your jobs pull code directly on the agent).</li>
+      <li><strong>Containerization:</strong> Docker, Podman (for building/pushing containers).</li>
+      <li><strong>Cloud CLIs:</strong> AWS CLI, Azure CLI, gcloud (for cloud deployments).</li>
+      <li><strong>Language Runtimes:</strong> Node.js, Python, Ruby, etc. (if your jobs run scripts).</li>
+      <li><strong>OS-Specific Tools:</strong> make, gcc (for compiling C/C++ code on Linux) and PowerShell (for Windows agents).</li>
+    </ul>
+    
+    <h2>3. Agent Setup Best Practices</h2>
+    <ul>
+      <li><strong>Minimal Base Setup:</strong> Start with Java and gradually install tools as needed for your pipelines.</li>
+      <li><strong>Use Labels:</strong> Assign labels to agents (e.g., docker, windows, python) to match jobs to agents with the right tools.</li>
+      <li><strong>Ephemeral Agents:</strong> For dynamic environments (e.g., Kubernetes/Docker), tools can be baked into agent images.</li>
+    </ul>
+    
+    <h2>Example Scenarios</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Job Type</th>
+          <th>Tools Required on Agent</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Java/Maven Build</td>
+          <td>Java, Maven, Git</td>
+        </tr>
+        <tr>
+          <td>Python Testing</td>
+          <td>Python, pip, pytest</td>
+        </tr>
+        <tr>
+          <td>Docker Image Build</td>
+          <td>Docker, Git</td>
+        </tr>
+        <tr>
+          <td>.NET Core Application</td>
+          <td>.NET SDK, Git</td>
+        </tr>
+        <tr>
+          <td>AWS Deployment</td>
+          <td>AWS CLI, Terraform, Ansible</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <h2>4. How to Install Tools on the Agent</h2>
+    <p>
+      For an Ubuntu-based agent (AWS EC2 instance):
+    </p>
+    <pre>
+# Install Git
+sudo apt install git -y
+
+# Install Maven
+sudo apt install maven -y
+
+# Install Docker
+sudo apt install docker.io -y
+sudo usermod -aG docker $USER  # Add Jenkins agent user to docker group
+    </pre>
+    
+    <h2>5. Special Cases</h2>
+    <ul>
+      <li>
+        <strong>Docker-Based Agents:</strong> If using the Docker plugin, tools can be pre-installed in the Docker image.
+      </li>
+      <li>
+        <strong>Kubernetes Pod Agents:</strong> Tools are defined in the pod template (no need to install them on the host).
+      </li>
+    </ul>
+    
+    <h2>6. Verify Agent Capabilities</h2>
+    <p>
+      On the Jenkins Master, go to <strong>Manage Jenkins → Nodes</strong>.
+    </p>
+    <p>
+      Click the agent name → <strong>Script Console</strong>.
+    </p>
+    <p>
+      Run commands to check installed tools:
+    </p>
+    <pre>
+println "Java: " + "java -version".execute().text
+println "Git: " + "git --version".execute().text
+    </pre>
+    
+    <h2>Key Takeaways</h2>
+    <ul>
+      <li>Java is the only strict requirement for basic agent functionality.</li>
+      <li>All other tools depend on your pipeline’s needs (e.g., Git for SCM, Docker for containers).</li>
+      <li>Use Jenkins Pipeline or the Tool Installers plugin to automate tool installations on agents.</li>
+      <li>If your jobs are failing with errors like <code>git: command not found</code> or <code>mvn: not found</code>, install the missing tools on the agent.</li>
+    </ul>
+  </div>
+</body>
+</html>
