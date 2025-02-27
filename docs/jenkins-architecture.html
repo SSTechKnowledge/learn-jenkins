@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jenkins Master-Agent Architecture</title>
+    <!-- Mermaid.js for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 0 20px;
+            color: #24292e;
+        }
+        h1, h2 { color: #0366d6; }
+        .architecture-table { 
+            width: 100%; 
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .architecture-table td, .architecture-table th {
+            border: 1px solid #e1e4e8;
+            padding: 10px;
+            text-align: left;
+        }
+        code { 
+            background-color: #f6f8fa; 
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+        }
+        .mermaid { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 6px;
+            border: 1px solid #e1e4e8;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jenkins Master-Agent Architecture</h1>
+    
+    <div class="mermaid">
+        graph TD
+            subgraph Jenkins Master
+                A[Scheduler] --> B[Job Queue]
+                B --> C[Assign Jobs]
+                C --> D[Agents]
+                E[Configuration Storage]
+                F[Plugin Manager]
+            end
+            
+            subgraph Agents
+                D --> G[Linux Agent]
+                D --> H[Windows Agent]
+                D --> I[Docker Agent]
+                G --> J[Executors]
+                H --> K[Workspace]
+                I --> L[Ephemeral]
+            end
+            
+            M[GitHub Webhook] --> A
+            J --> N[Build Results]
+            K --> N
+            L --> N
+            N --> O[Artifact Storage]
+    </div>
+
+    <h2>Core Components</h2>
+    <table class="architecture-table">
+        <tr>
+            <th>Jenkins Master</th>
+            <th>Agents/Nodes</th>
+        </tr>
+        <tr>
+            <td>
+                <ul>
+                    <li>Central control unit</li>
+                    <li>Manages job scheduling</li>
+                    <li>Stores configurations</li>
+                    <li>Manages plugins</li>
+                    <li>Web UI Dashboard</li>
+                </ul>
+            </td>
+            <td>
+                <ul>
+                    <li>Worker machines</li>
+                    <li>Execute build tasks</li>
+                    <li>Isolated environments</li>
+                    <li>Multiple executors</li>
+                    <li>Dynamic scaling</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <h2>Key Features</h2>
+    <ul>
+        <li><strong>Distributed Workloads:</strong> Parallel job execution across agents</li>
+        <li><strong>Environment Isolation:</strong> Dedicated OS/tools per agent</li>
+        <li><strong>Scalability:</strong> Add agents on-demand</li>
+        <li><strong>Fault Tolerance:</strong> Automatic job rerouting</li>
+    </ul>
+
+    <h2>Communication Flow</h2>
+    <ol>
+        <li>Master receives trigger (webhook/schedule)</li>
+        <li>Scheduler matches job requirements with agent labels</li>
+        <li>Agent pulls job configuration via SSH/JNLP</li>
+        <li>Agent executes build and reports back results</li>
+        <li>Master stores artifacts and displays metrics</li>
+    </ol>
+
+    <h2>Setup Commands</h2>
+    <pre><code># On Agent Nodes
+sudo apt install openjdk-11-jdk
+mkdir -p /home/jenkins/workspace
+useradd -m -d /home/jenkins jenkins</code></pre>
+
+    <h2>Troubleshooting</h2>
+    <ul>
+        <li><code>Agent offline:</code> Check SSH keys and firewall rules</li>
+        <li><code>Build failures:</code> Verify tool versions on agents</li>
+        <li><code>Connection issues:</code> Test JNLP/SSH connectivity</li>
+    </ul>
+</body>
+</html>

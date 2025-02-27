@@ -1,0 +1,289 @@
+<p>The&nbsp;<strong>Jenkins Master-Agent Architecture</strong>&nbsp;(also called&nbsp;<strong>Master-Node</strong>&nbsp;or&nbsp;<strong>Controller-Agent</strong>) is designed to distribute workloads across multiple machines, enabling scalable and efficient CI/CD pipelines. Here's a detailed breakdown:</p>
+<hr />
+<h3><strong>Key Components</strong></h3>
+<ol start="1">
+<li>
+<p><strong>Jenkins Master (Controller)</strong></p>
+<ul>
+<li>
+<p>The central control unit that manages the entire Jenkins ecosystem.</p>
+</li>
+<li>
+<p><strong>Responsibilities</strong>:</p>
+<ul>
+<li>
+<p>Schedules jobs (builds, tests, deployments).</p>
+</li>
+<li>
+<p>Stores configuration and job metadata.</p>
+</li>
+<li>
+<p>Manages user interface (dashboard).</p>
+</li>
+<li>
+<p>Coordinates communication with agents.</p>
+</li>
+<li>
+<p>Hosts plugins and global tool configurations.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Does NOT execute jobs directly</strong>&nbsp;(by default) to avoid performance bottlenecks.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Agents (Nodes)</strong></p>
+<ul>
+<li>
+<p>Worker machines that execute jobs assigned by the master.</p>
+</li>
+<li>
+<p><strong>Responsibilities</strong>:</p>
+<ul>
+<li>
+<p>Run build tasks (e.g., compiling code, running tests).</p>
+</li>
+<li>
+<p>Isolate workloads to avoid resource contention.</p>
+</li>
+<li>
+<p>Provide environment-specific capabilities (e.g., OS, tools).</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Agents can be physical machines, VMs, containers (Docker), or cloud instances.</p>
+</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3><strong>How It Works</strong></h3>
+<ol start="1">
+<li>
+<p><strong>Job Distribution</strong></p>
+<ul>
+<li>
+<p>The master assigns jobs to agents based on:</p>
+<ul>
+<li>
+<p><strong>Labels</strong>: Match agent capabilities (e.g., "linux", "docker").</p>
+</li>
+<li>
+<p><strong>Availability</strong>: Agents with free executor slots.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Example: A job requiring&nbsp;<code>Node.js v18</code>&nbsp;runs only on agents labeled with that version.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Communication</strong></p>
+<ul>
+<li>
+<p><strong>Master &rarr; Agent</strong>:</p>
+<ul>
+<li>
+<p>Commands, job configurations, and artifacts are sent to the agent.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Agent &rarr; Master</strong>:</p>
+<ul>
+<li>
+<p>Build status, logs, and results are reported back.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Connection Types</strong>:</p>
+<ul>
+<li>
+<p><strong>SSH</strong>: Secure shell (common for Linux agents).</p>
+</li>
+<li>
+<p><strong>JNLP (Java Web Start)</strong>: Agent connects to the master via TCP (useful for dynamic/cloud agents).</p>
+</li>
+<li>
+<p><strong>Docker/Kubernetes</strong>: Ephemeral agents spun up on demand.</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Agent Setup</strong></p>
+<ul>
+<li>
+<p>Agents must have:</p>
+<ul>
+<li>
+<p>Java Runtime Environment (JRE).</p>
+</li>
+<li>
+<p>Network access to the master.</p>
+</li>
+<li>
+<p>Tools required for jobs (e.g., Git, Maven, Docker).</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3><strong>Benefits</strong></h3>
+<ol start="1">
+<li>
+<p><strong>Scalability</strong></p>
+<ul>
+<li>
+<p>Distribute workloads across multiple agents to handle parallel jobs.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Resource Isolation</strong></p>
+<ul>
+<li>
+<p>Prevent resource-heavy builds from affecting the master&rsquo;s stability.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Environment Flexibility</strong></p>
+<ul>
+<li>
+<p>Run jobs in different OS/software environments (e.g., Windows build agents, Linux test agents).</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Security</strong></p>
+<ul>
+<li>
+<p>Isolate sensitive builds (e.g., production deployments) to dedicated agents.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Fault Tolerance</strong></p>
+<ul>
+<li>
+<p>If an agent fails, the master can reroute jobs to other agents.</p>
+</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3><strong>Example Use Cases</strong></h3>
+<ol start="1">
+<li>
+<p><strong>Multi-Platform Testing</strong></p>
+<ul>
+<li>
+<p>Use a Windows agent for .NET builds and a Linux agent for Python tests.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Ephemeral Agents</strong></p>
+<ul>
+<li>
+<p>Spin up Docker/Kubernetes agents dynamically for short-lived tasks.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Load Balancing</strong></p>
+<ul>
+<li>
+<p>Distribute 100+ daily builds across 10 agents to reduce queue time.</p>
+</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3><strong>Setup Steps</strong></h3>
+<ol start="1">
+<li>
+<p><strong>Add an Agent</strong></p>
+<ul>
+<li>
+<p>Go to&nbsp;<strong>Manage Jenkins &rarr; Nodes &rarr; New Node</strong>.</p>
+</li>
+<li>
+<p>Specify agent details (name, labels, remote root directory).</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Launch Method</strong></p>
+<ul>
+<li>
+<p>Choose&nbsp;<strong>Launch agents via SSH</strong>&nbsp;(for Linux) or&nbsp;<strong>Launch agent via Java Web Start</strong>&nbsp;(JNLP).</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Agent Configuration</strong></p>
+<ul>
+<li>
+<p>Install required tools (e.g., Git, JDK) on the agent machine.</p>
+</li>
+<li>
+<p>Assign labels like&nbsp;<code>docker</code>&nbsp;or&nbsp;<code>prod-deploy</code>&nbsp;for job targeting.</p>
+</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3><strong>Best Practices</strong></h3>
+<ul>
+<li>
+<p><strong>Keep the Master Lightweight</strong>: Avoid running jobs on the master.</p>
+</li>
+<li>
+<p><strong>Use Labels</strong>: Organize agents by purpose (e.g.,&nbsp;<code>frontend</code>,&nbsp;<code>backend</code>).</p>
+</li>
+<li>
+<p><strong>Monitor Agents</strong>: Use plugins like&nbsp;<strong>Monitoring</strong>&nbsp;or&nbsp;<strong>Prometheus</strong>&nbsp;to track CPU/memory usage.</p>
+</li>
+<li>
+<p><strong>Secure Agents</strong>: Restrict agent access to trusted users and networks.</p>
+</li>
+</ul>
+<hr />
+<h3><strong>Troubleshooting Tips</strong></h3>
+<ul>
+<li>
+<p><strong>Agent Offline?</strong></p>
+<ul>
+<li>
+<p>Check network connectivity, SSH/JNLP ports, or agent machine health.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Build Failures on Agents?</strong></p>
+<ul>
+<li>
+<p>Verify tool installations and workspace permissions on the agent.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>High Load?</strong></p>
+<ul>
+<li>
+<p>Add more agents or optimize job parallelism.</p>
+</li>
+</ul>
+</li>
+</ul>
+<!-- Comments are visible in the HTML source only -->
