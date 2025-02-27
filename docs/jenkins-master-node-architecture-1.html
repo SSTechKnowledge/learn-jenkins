@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jenkins Master-Agent Architecture</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-text: #2c3e50;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--dark-text);
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 2.5rem 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        h2 i {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+        }
+
+        .content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin: 2rem 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        ol, ul {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        li::before {
+            content: "▹";
+            color: var(--secondary-color);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        code {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--secondary-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+
+        hr {
+            border: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--secondary-color), transparent);
+            margin: 3rem 0;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+            border-top: 3px solid var(--secondary-color);
+        }
+
+        .icon-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .icon-header i {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content-card">
+            <h2><i class="fas fa-sitemap"></i> Jenkins Master-Agent Architecture</h2>
+            <p>The <strong>Jenkins Master-Agent Architecture</strong> (also called <strong>Master-Node</strong> or <strong>Controller-Agent</strong>) is designed to distribute workloads across multiple machines, enabling scalable and efficient CI/CD pipelines.</p>
+        </div>
+
+        <div class="content-card">
+            <h2><i class="fas fa-cube"></i> Key Components</h2>
+            <div class="grid-container">
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-server"></i>
+                        <h3>Jenkins Master</h3>
+                    </div>
+                    <ul>
+                        <li>The central control unit managing the ecosystem</li>
+                        <li><strong>Responsibilities:</strong>
+                            <ul>
+                                <li>Schedules jobs (builds, tests, deployments)</li>
+                                <li>Stores configuration and metadata</li>
+                                <li>Manages user interface/dashboard</li>
+                                <li>Coordinates agent communication</li>
+                            </ul>
+                        </li>
+                        <li><em>Does NOT execute jobs directly</em></li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-microchip"></i>
+                        <h3>Agents (Nodes)</h3>
+                    </div>
+                    <ul>
+                        <li>Worker machines executing jobs</li>
+                        <li><strong>Responsibilities:</strong>
+                            <ul>
+                                <li>Run build tasks (compiling, testing)</li>
+                                <li>Isolate workloads</li>
+                                <li>Provide environment-specific capabilities</li>
+                            </ul>
+                        </li>
+                        <li>Can be VMs, containers, or cloud instances</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2><i class="fas fa-exchange-alt"></i> How It Works</h2>
+            <div class="feature-box">
+                <div class="icon-header">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Job Distribution</h3>
+                </div>
+                <ul>
+                    <li>Assignment based on:
+                        <ul>
+                            <li><code>Labels</code> matching capabilities</li>
+                            <li>Agent availability</li>
+                        </ul>
+                    </li>
+                    <li>Example: <code>Node.js v18</code> requirement</li>
+                </ul>
+            </div>
+
+            <div class="feature-box">
+                <div class="icon-header">
+                    <i class="fas fa-comments"></i>
+                    <h3>Communication</h3>
+                </div>
+                <ul>
+                    <li><strong>Master → Agent:</strong> Commands, configurations</li>
+                    <li><strong>Agent → Master:</strong> Status, logs, results</li>
+                    <li><strong>Connection Types:</strong>
+                        <ul>
+                            <li><code>SSH</code> (Linux)</li>
+                            <li><code>JNLP</code> (Cloud)</li>
+                            <li><code>Docker/Kubernetes</code></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="feature-box">
+                <div class="icon-header">
+                    <i class="fas fa-comments"></i>
+                    <h3>Agent Setup</h3>
+                </div>
+                <ul>
+                    <li><strong>Agents must have:</strong>
+                        <ul>
+                            <li>Java Runtime Environment (JRE).</li>
+                            <li>Network access to the master.</li>
+                            <li>Tools required for jobs (e.g., Git, Maven, Docker).</code></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2><i class="fas fa-chart-line"></i> Benefits</h2>
+            <div class="grid-container">
+                <div class="benefit-card">
+                    <div class="icon-header">
+                        <div class="number-badge">1</div>
+                        <h3>Scalability</h3>
+                    </div>
+                    <p>Distribute workloads across multiple agents for parallel processing</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="icon-header">
+                        <div class="number-badge">2</div>
+                        <h3>Resource Isolation</h3>
+                    </div>
+                    <p>Keep resource-heavy builds separate from the master</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="icon-header">
+                        <div class="number-badge">3</div>
+                        <h3>Environment Flexibility</h3>
+                    </div>
+                    <p>Run jobs in different OS/software environments</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="icon-header">
+                        <div class="number-badge">4</div>
+                        <h3>Security</h3>
+                    </div>
+                    <p>Isolate sensitive builds to dedicated agents</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="icon-header">
+                        <div class="number-badge">5</div>
+                        <h3>Fault Tolerance</h3>
+                    </div>
+                    <p>Automatic job rerouting during agent failures</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2><i class="fas fa-laptop-code"></i> Example Use Cases</h2>
+            <div class="grid-container">
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-windows"></i>
+                        <h4>Multi-Platform Testing</h4>
+                    </div>
+                    <p>Windows agent for .NET builds + Linux agent for Python tests</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-bolt"></i>
+                        <h4>Ephemeral Agents</h4>
+                    </div>
+                    <p>Docker/Kubernetes agents for short-lived tasks</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-balance-scale"></i>
+                        <h4>Load Balancing</h4>
+                    </div>
+                    <p>Distribute 100+ builds across 10 agents</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2><i class="fas fa-tools"></i> Setup Steps</h2>
+            <div class="grid-container">
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <div class="number-badge">1</div>
+                        <h4>Add Agent</h4>
+                    </div>
+                    <ul>
+                        <li><code>Manage Jenkins → Nodes → New Node</code></li>
+                        <li>Specify name, labels, directory</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <div class="number-badge">2</div>
+                        <h4>Launch Method</h4>
+                    </div>
+                    <ul>
+                        <li>SSH (Linux)</li>
+                        <li>JNLP (Cloud)</li>
+                        <li>Docker/Kubernetes</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <div class="number-badge">3</div>
+                        <h4>Configuration</h4>
+                    </div>
+                    <ul>
+                        <li>Install required tools</li>
+                        <li>Assign labels (<code>docker</code>, <code>prod-deploy</code>)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2><i class="fas fa-star"></i> Best Practices</h2>
+            <div class="grid-container">
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-feather"></i>
+                        <h4>Lightweight Master</h4>
+                    </div>
+                    <p>Avoid running jobs directly on master</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-tag"></i>
+                        <h4>Labeling System</h4>
+                    </div>
+                    <p>Organize agents by purpose (frontend/backend)</p>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>Security</h4>
+                    </div>
+                    <p>Restrict agent access to trusted networks</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2><i class="fas fa-bug"></i> Troubleshooting Tips</h2>
+            <div class="grid-container">
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-plug"></i>
+                        <h4>Agent Offline</h4>
+                    </div>
+                    <ul>
+                        <li>Check network connectivity</li>
+                        <li>Verify SSH/JNLP ports</li>
+                        <li>Monitor agent machine health</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h4>Build Failures</h4>
+                    </div>
+                    <ul>
+                        <li>Verify tool installations</li>
+                        <li>Check workspace permissions</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <div class="icon-header">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <h4>High Load</h4>
+                    </div>
+                    <ul>
+                        <li>Add more agents</li>
+                        <li>Optimize job parallelism</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
