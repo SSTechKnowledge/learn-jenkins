@@ -113,7 +113,7 @@
     
     <h3>Install Java (Jenkins dependency):</h3>
     <pre>sudo apt update
-sudo apt install openjdk-11-jdk -y</pre>
+sudo apt install openjdk-17-jdk -y</pre>
     
     <h3>Install Jenkins:</h3>
     <pre>curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc &gt; /dev/null
@@ -141,7 +141,7 @@ sudo systemctl enable jenkins</pre>
     
     <h3>Install Java (required for Jenkins agents):</h3>
     <pre>sudo apt update
-sudo apt install openjdk-11-jdk -y</pre>
+sudo apt install openjdk-17-jdk -y</pre>
     
     <h3>Create a Jenkins User (optional but recommended):</h3>
     <pre>sudo useradd -m -d /home/jenkins-agent -s /bin/bash jenkins-agent
@@ -153,6 +153,13 @@ sudo passwd jenkins-agent  # Set a password</pre>
 sudo cat /var/lib/jenkins/.ssh/id_rsa.pub</pre>
     
     <p>Copy the public key.</p>
+    
+    <h4>NOTE:</h4>
+    <li><p>Jenkins requires private keys in PEM format (-----BEGIN RSA PRIVATE KEY-----).</p></li>
+    <li><p>Modern ssh-keygen generates keys in OpenSSH format by default, which is incompatible.</p></li>
+    <li><p>Convert the key to PEM format or regenerate it in PEM format to resolve the issue.</p></li>
+    <li><p>To generate an RSA private key in the PEM format, use the -m PEM option with ssh-keygen. Here’s the command:</p></li>
+    <ul></li><pre>sudo -u jenkins ssh-keygen -t rsa -m PEM -f /var/lib/jenkins/.ssh/id_rsa</pre></ul>
     
     <h3>Add Public Key to Slave:</h3>
     <p>On the Slave instance:</p>
