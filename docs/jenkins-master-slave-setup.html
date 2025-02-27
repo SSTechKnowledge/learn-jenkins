@@ -155,12 +155,14 @@ sudo cat /var/lib/jenkins/.ssh/id_rsa.pub</pre>
     <p>Copy the public key.</p>
     
     <h4>NOTE:</h4>
-    <li><p>Jenkins requires private keys in PEM format (-----BEGIN RSA PRIVATE KEY-----).</p></li>
-    <li><p>Modern ssh-keygen generates keys in OpenSSH format by default, which is incompatible.</p></li>
-    <li><p>Convert the key to PEM format or regenerate it in PEM format to resolve the issue.</p></li>
-    <li><p>To generate an RSA private key in the PEM format, use the -m PEM option with ssh-keygen. Here’s the command:</p></li>
-    <ul></li><pre>sudo -u jenkins ssh-keygen -t rsa -m PEM -f /var/lib/jenkins/.ssh/id_rsa</pre></ul>
-    
+    <ul>
+      <li>Jenkins requires private keys in <strong>PEM</strong> format (-----BEGIN RSA PRIVATE KEY-----).</li>
+      <li>Modern ssh-keygen generates keys in <strong>OpenSSH</strong> format by default, which is incompatible.</li>
+      <li>Convert the key to PEM format or regenerate it in PEM format to resolve the issue.</li>
+      <li>To generate an RSA private key in the PEM format, use the <em>-m PEM</em> option with ssh-keygen. Here&rsquo;s the command:</li>
+    </ul>
+    <pre>sudo -u jenkins ssh-keygen -t rsa -m PEM -f /var/lib/jenkins/.ssh/id_rsa</pre>
+
     <h3>Add Public Key to Slave:</h3>
     <p>On the Slave instance:</p>
     <pre>sudo su - jenkins-agent
