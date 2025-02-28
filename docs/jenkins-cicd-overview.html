@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview of Jenkins and CI/CD Concepts</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #222;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #0366d6;
+      margin-top: 30px;
+      border-bottom: 2px solid #e2e2e2;
+      padding-bottom: 5px;
+    }
+    h3 {
+      color: #0366d6;
+      margin-top: 20px;
+    }
+    p {
+      margin: 15px 0;
+      line-height: 1.6;
+    }
+    ul, ol {
+      margin: 15px 0;
+      padding-left: 20px;
+    }
+    li {
+      margin: 10px 0;
+    }
+    .sub-list {
+      margin-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Overview of Jenkins and CI/CD Concepts</h1>
+    <p>
+      Jenkins is an open-source automation server that plays a pivotal role in implementing Continuous Integration and Continuous Delivery (CI/CD) pipelines. It automates the building, testing, and deployment of software, enabling development teams to deliver quality applications more rapidly and reliably.
+    </p>
+    
+    <h2>Jenkins Overview</h2>
+    <ul>
+      <li>
+        <strong>Automation Server:</strong>
+        <p>
+          Jenkins automates repetitive tasks such as code compilation, testing, and deployment. It reduces manual errors and accelerates feedback loops during software development.
+        </p>
+      </li>
+      <li>
+        <strong>Plugin Ecosystem:</strong>
+        <p>
+          With hundreds of plugins available, Jenkins can integrate with a variety of tools—ranging from source control systems (like Git or SVN) to build tools (such as Maven, Gradle) and deployment platforms (cloud services, Docker, Kubernetes).
+        </p>
+      </li>
+      <li>
+        <strong>Master-Agent Architecture:</strong>
+        <p>
+          Jenkins uses a distributed architecture where a central server (the Master) coordinates tasks and multiple agents (or slaves) execute the jobs. This design allows for parallel processing and scalability across different environments.
+        </p>
+      </li>
+      <li>
+        <strong>Pipeline as Code:</strong>
+        <p>
+          Through Jenkins Pipelines (defined in a Jenkinsfile), developers can script the CI/CD workflow. This approach promotes versioning, reusability, and better collaboration on the build process.
+        </p>
+      </li>
+    </ul>
+    
+    <h2>CI/CD Concepts</h2>
+    <ul>
+      <li>
+        <strong>Continuous Integration (CI):</strong>
+        <p>
+          CI is the practice of frequently merging code changes into a shared repository. Each integration is automatically built and tested to detect errors early, ensuring that code remains in a releasable state. This practice minimizes integration issues and encourages better code quality.
+        </p>
+      </li>
+      <li>
+        <strong>Continuous Delivery (CD):</strong>
+        <p>
+          Continuous Delivery builds on CI by ensuring that the software can be released at any time. After the build and testing stages, the software is automatically packaged and prepared for deployment. While the deployment may still be a manual decision, the process is streamlined and repeatable.
+        </p>
+      </li>
+      <li>
+        <strong>Continuous Deployment:</strong>
+        <p>
+          An extension of Continuous Delivery, Continuous Deployment automates the deployment process as well. Every change that passes the automated tests is deployed directly to production, reducing the time-to-market and ensuring rapid delivery of new features.
+        </p>
+      </li>
+      <li>
+        <strong>Benefits of CI/CD:</strong>
+        <ul class="sub-list">
+          <li><strong>Faster Feedback:</strong> Developers receive immediate insights into the impact of their changes.</li>
+          <li><strong>Improved Quality:</strong> Automated testing catches issues early in the development cycle.</li>
+          <li><strong>Reduced Risk:</strong> Frequent, small updates lower the risk associated with large, infrequent releases.</li>
+          <li><strong>Enhanced Collaboration:</strong> A shared, automated process encourages collaboration and transparency across teams.</li>
+        </ul>
+      </li>
+    </ul>
+    
+    <p>
+      Together, Jenkins and CI/CD concepts empower development teams to achieve faster, more reliable releases, ensuring that software delivery keeps pace with business needs.
+    </p>
+    
+    <!-- Additional Section -->
+    <h2>Jenkins CI/CD Overview</h2>
+    <p>
+      Jenkins automates the software development lifecycle (SDLC) from development to deployment, including necessary checks like vulnerability and security scanning.
+    </p>
+    <img src="./images/jenkins-sdlc-cicd-overview.png" alt="Jenkins CICD SDLC">
+    <ol>
+      <li><strong>Code Commit:</strong> Developers push code changes to a version control system (e.g., Git).</li>
+      <li><strong>Build:</strong> Jenkins pulls the latest code and compiles it into executable artifacts.</li>
+      <li><strong>Testing:</strong> Automated unit tests, integration tests, and functional tests are executed.</li>
+      <li><strong>Code Quality and Security Checks:</strong> Static code analysis, vulnerability scanning, and security checks are performed.</li>
+      <li><strong>Deployment to Staging:</strong> The application is deployed to a staging environment for further testing.</li>
+      <li><strong>User Acceptance Testing (UAT):</strong> Manual or automated UAT is performed in the staging environment.</li>
+      <li><strong>Deployment to Production:</strong> The application is deployed to the production environment after all checks pass.</li>
+      <li><strong>Post-Deployment Monitoring:</strong> Jenkins can trigger monitoring and alerting tools to ensure the application runs smoothly in production.</li>
+    </ol>
+  </div>
+</body>
+</html>
